@@ -1,1 +1,47 @@
 <p>In the future, there will be an Import module UI.</p>
+
+<div class="product-import">
+    <?php if (!$block->getIsReadonly()) :?>
+        <div class="import-product">
+            <?php if ($block->getUseContainer()) :?>
+            <form id="product-import-form"
+                  class="admin__fieldset"
+                  action="<?= $block->escapeUrl($block->getUrl('kukharchuk/productimport/product')) ?>"
+                  method="post"
+                  enctype="multipart/form-data">
+                <?php endif; ?>
+                <?= $block->getBlockHtml('formkey') ?>
+                <div class="fieldset admin__field">
+                    <label for="import_products_file" class="admin__field-label"><span><?= $block->escapeHtml(__('Import Products')) ?></span></label>
+                    <div class="admin__field-control">
+                        <input type="file"
+                               id="import_products_file"
+                               name="import_products_file"
+                               class="input-file required-entry"/>
+                        <?= $block->getButtonHtml(__('Import Products'), '', 'import-submit') ?>
+                    </div>
+                </div>
+                <?php if ($block->getUseContainer()) :?>
+            </form>
+        <?php endif; ?>
+            <script>
+                require(['jquery', "mage/mage", "loadingPopup"], function(jQuery){
+
+                    jQuery('#product-import-form').mage('form').mage('validation');
+                    (function ($) {
+                        $('.import-submit').click(function(){
+                            if($(':input[name="import_products_file"]').val()) {
+                                $('body').loadingPopup({
+                                    timeout: false
+                                });
+
+                                $(this.form).submit();
+                            }
+                        });
+                    })(jQuery);
+
+                });
+            </script>
+        </div>
+    <?php endif; ?>
+</div>
