@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Kukharchuk_ProductImport::product_import" title="My test module" translate="title" module="Kukharchuk_ProductImport" parent="Magento_Catalog::catalog" sortOrder="50" dependsOnModule="Kukharchuk_ProductImport" resource="Kukharchuk_ProductImport::product_import"/>
+        <add id="Kukharchuk_ProductImport::product_import_import" title="Product Import" translate="title" module="Kukharchuk_ProductImport" parent="Kukharchuk_ProductImport::product_import" sortOrder="10" dependsOnModule="Kukharchuk_ProductImport" action="kukharchuk/productimport" resource="Kukharchuk_ProductImport::product_import"/>
+    </menu>
+</config>
