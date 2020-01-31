@@ -2,6 +2,8 @@
 
 namespace Kukharchuk\ProductImport\Controller\Adminhtml\ProductImport;
 
+use Magento\Framework\Controller\ResultFactory;
+
 class Index extends \Magento\Backend\App\Action
 {
     /**
@@ -36,6 +38,8 @@ class Index extends \Magento\Backend\App\Action
      */
     public function execute()
     {
-        return $resultPage = $this->resultPageFactory->create();
+        $resultPage = $this->resultFactory->create(ResultFactory::TYPE_PAGE);
+        $resultPage->setActiveMenu('Kukharchuk_ProductImport::product_import_import');
+        return $resultPage;
     }
 }
