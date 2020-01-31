@@ -5,6 +5,12 @@ namespace Kukharchuk\ProductImport\Controller\Adminhtml\ProductImport;
 class Index extends \Magento\Backend\App\Action
 {
     /**
+     * Authorization level of a basic admin session
+     *
+     * @see _isAllowed()
+     */
+    const ADMIN_RESOURCE = 'Kukharchuk_ProductImport::product_import_import';
+    /**
      * @var \Magento\Framework\View\Result\PageFactory
      */
     protected $resultPageFactory;
