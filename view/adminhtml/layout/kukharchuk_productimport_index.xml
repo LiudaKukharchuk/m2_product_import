@@ -9,7 +9,7 @@
     <body>
         <referenceContainer name="content">
             <block class="Kukharchuk\ProductImport\Block\Adminhtml\Form"
-                   template="Kukharchuk_ProductImport::import.phtml"/>
+                   template="Kukharchuk_ProductImport::import/product.phtml"/>
         </referenceContainer>
     </body>
 </page>
