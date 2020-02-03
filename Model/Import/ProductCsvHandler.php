@@ -1,7 +1,7 @@
 <?php
 
 namespace Kukharchuk\ProductImport\Model\Import;
-use Magento\Catalog\Api\ProductRepositoryInterface;
+
 class ProductCsvHandler
 {
     /**
@@ -10,8 +10,6 @@ class ProductCsvHandler
      * @var \Magento\Store\Model\ResourceModel\Store\Collection
      */
     protected $_publicStores;
-
-    protected $productRepository;
     /**
      * CSV Processor
      *
@@ -22,21 +20,37 @@ class ProductCsvHandler
      * @var array
      */
     protected $attributeMap;
+    /**
+     * @var \Magento\Catalog\Model\ProductFactory
+     */
+    protected $_productFactory;
+    /**
+     * @var \Magento\Eav\Api\AttributeRepositoryInterface
+     */
+    protected $attributeRepository;
+    /**
+     * @var string
+     */
+    protected $idField;
 
     /**
+     * ProductCsvHandler constructor.
+     *
      * @param \Magento\Store\Model\ResourceModel\Store\Collection $storeCollection
-     * @param ProductRepositoryInterface $productRepository
      * @param \Magento\Framework\File\Csv $csvProcessor
+     * @param \Magento\Catalog\Model\ProductFactory $_productFactory
+     * @param \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository
      */
     public function __construct(
         \Magento\Store\Model\ResourceModel\Store\Collection $storeCollection,
-        ProductRepositoryInterface $productRepository,
-        \Magento\Framework\File\Csv $csvProcessor
+        \Magento\Framework\File\Csv $csvProcessor,
+        \Magento\Catalog\Model\ProductFactory $_productFactory,
+        \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository
     ) {
-        // prevent admin store from loading
         $this->_publicStores = $storeCollection->setLoadDefault(false);
-        $this->productRepository = $productRepository;
+        $this->_productFactory = $_productFactory;
         $this->csvProcessor = $csvProcessor;
+        $this->attributeRepository = $attributeRepository;
     }
 
     /**
@@ -52,15 +66,13 @@ class ProductCsvHandler
             throw new \Magento\Framework\Exception\LocalizedException(__('Invalid file upload attempt.'));
         }
         $productsRawData = $this->csvProcessor->getData($file['tmp_name']);
+
         // first row of file represents headers
-        $fileFields = $productsRawData[0];
-        $this->createAttributeMap($fileFields);
-        // store cache array is used to quickly retrieve store ID when handling locale-specific tax rate titles
-        foreach ($productsRawData as $rowIndex => $dataRow) {
-            // skip headers
-            if ($rowIndex == 0) {
-                continue;
-            }
+        $this->setAttributeMap(array_shift($productsRawData));
+        $this->setIdField();
+        // check if all imported columns have a proper attribute
+        $this->checkAttributes();
+        foreach ($productsRawData as $dataRow) {
             $this->_importProduct($dataRow);
         }
     }
@@ -68,34 +80,84 @@ class ProductCsvHandler
     /**
      * @param array $fields
      */
-    protected function createAttributeMap(array $fields)
+    protected function setAttributeMap(array $fields)
     {
         $this->attributeMap = $fields;
     }
 
     /**
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    protected function setIdField()
+    {
+        if (array_search('id', $this->attributeMap)) {
+            $this->idField = 'id';
+        } elseif (array_search('sku', $this->attributeMap)) {
+            $this->idField = 'sku';
+        } else {
+            throw new \Magento\Framework\Exception\LocalizedException(
+                __("There are no `id` or `sku` field in the file.")
+            );
+        }
+    }
+
+    /**
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    protected function checkAttributes()
+    {
+        $notExistAttributes = [];
+        foreach ($this->attributeMap as $attribute) {
+            try {
+                $attribute = $this->attributeRepository->get(\Magento\Catalog\Model\Product::ENTITY, $attribute);
+            } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
+                $notExistAttributes[] = $attribute;
+            }
+        }
+        if (count($notExistAttributes) >= 1) {
+            throw new \Magento\Framework\Exception\LocalizedException(
+                __("There are no attributes with codes: " .
+                    implode(', ', $notExistAttributes) .
+                    ". <b>Please create attribute/s or check imported file.</b>")
+            );
+        }
+    }
+
+    /**
      * @param array $productData
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws \Exception
      */
     protected function _importProduct(array $productData)
     {
+        $productData = $this->applyAttributeMap($productData);
 
-            $modelData = [
-                'tax_country_id' => $productData[1],
-                'rate'           => $productData[4],
-                'zip_is_range'   => $productData[5],
-                'zip_from'       => $productData[6],
-                'zip_to'         => $productData[7],
-            ];
-            // try to load existing rate
-        $productId=1;
-         $product = $this->productRepository->getById($productId);
-//        $product->addData($modelData);
+        $product = $this->_productFactory->create()->load($productData[$this->idField], $this->idField);
+        $product->addData($productData);
 
-
-
-        $product->setTitle('$rateTitles');
         $product->save();
+    }
 
+    /**
+     * @param $productData
+     * @return array
+     */
+    protected function applyAttributeMap($productData)
+    {
+        $mappedData = [];
+        foreach ($productData as $index => $data) {
+            $mappedData[$this->attributeMap[$index]] = $data;
+        }
+
+        return $mappedData;
+    }
+
+    // TODO: need to delete
+    protected function log($message)
+    {
+        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/templog.log');
+        $logger = new \Zend\Log\Logger();
+        $logger->addWriter($writer);
+
+        $logger->info($message);
     }
 }
