@@ -4,17 +4,17 @@ namespace Kukharchuk\ProductImport\Controller\Adminhtml\ProductImport;
 
 use Magento\Framework\Controller\ResultFactory;
 
-class Product extends \Kukharchuk\ProductImport\Controller\Adminhtml\Base
+class Attribute extends \Kukharchuk\ProductImport\Controller\Adminhtml\Base
 {
     /**
-     * @var \Kukharchuk\ProductImport\Model\Import\ProductCsvHandler
+     * @var \Kukharchuk\ProductImport\Model\Import\AttributeCsvHandler
      */
     protected $importHandler;
 
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         \Magento\Framework\App\Response\Http\FileFactory $fileFactory,
-        \Kukharchuk\ProductImport\Model\Import\ProductCsvHandler $importHandler
+        \Kukharchuk\ProductImport\Model\Import\AttributeCsvHandler $importHandler
     ) {
         parent::__construct($context, $fileFactory);
         $this->importHandler = $importHandler;
@@ -22,17 +22,16 @@ class Product extends \Kukharchuk\ProductImport\Controller\Adminhtml\Base
 
     public function execute()
     {
-        $importProductsFile = $this->getRequest()->getFiles('import_products_file');
-        if ($this->getRequest()->isPost() && isset($importProductsFile['tmp_name'])) {
+        $importAttributeFile = $this->getRequest()->getFiles('import_attribute_file');
+        if ($this->getRequest()->isPost() && isset($importAttributeFile['tmp_name'])) {
             try {
+                $this->importHandler->importFromCsvFile($importAttributeFile);
 
-                $this->importHandler->importFromCsvFile($importProductsFile);
-
-                $this->messageManager->addSuccess(__('Products has been imported.'));
+                $this->messageManager->addSuccess(__('Attributes has been imported.'));
             } catch (\Magento\Framework\Exception\LocalizedException $e) {
                 $this->messageManager->addError($e->getMessage());
             } catch (\Exception $e) {
-                $this->messageManager->addError(__('Invalid file upload attempt'));
+                $this->messageManager->addError($e->getMessage());
             }
         } else {
             $this->messageManager->addError(__('Invalid file upload attempt'));

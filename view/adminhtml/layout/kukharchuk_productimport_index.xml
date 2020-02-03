@@ -10,6 +10,8 @@
         <referenceContainer name="content">
             <block class="Kukharchuk\ProductImport\Block\Adminhtml\Form"
                    template="Kukharchuk_ProductImport::import/product.phtml"/>
+            <block class="Kukharchuk\ProductImport\Block\Adminhtml\Form"
+                   template="Kukharchuk_ProductImport::import/attribute.phtml"/>
         </referenceContainer>
     </body>
 </page>

@@ -1,0 +1,45 @@
+<div class="attribute-import">
+    <?php if (!$block->getIsReadonly()) :?>
+        <div class="import-attribute">
+            <?php if ($block->getUseContainer()) :?>
+            <form id="attribute-import-form"
+                  class="admin__fieldset"
+                  action="<?= $block->escapeUrl($block->getUrl('kukharchuk/productimport/attribute')) ?>"
+                  method="post"
+                  enctype="multipart/form-data">
+                <?php endif; ?>
+                <?= $block->getBlockHtml('formkey') ?>
+                <div class="fieldset admin__field">
+                    <label for="import_attribute_file" class="admin__field-label"><span><?= $block->escapeHtml(__('Import Attributes')) ?></span></label>
+                    <div class="admin__field-control">
+                        <input type="file"
+                               id="import_attribute_file"
+                               name="import_attribute_file"
+                               class="input-file required-entry"/>
+                        <?= $block->getButtonHtml(__('Import Attributes'), '', 'import-submit') ?>
+                    </div>
+                </div>
+                <?php if ($block->getUseContainer()) :?>
+            </form>
+        <?php endif; ?>
+            <script>
+                require(['jquery', "mage/mage", "loadingPopup"], function(jQuery){
+
+                    jQuery('#product-import-form').mage('form').mage('validation');
+                    (function ($) {
+                        $('.import-submit').click(function(){
+                            if($(':input[name="import_attribute_file"]').val()) {
+                                $('body').loadingPopup({
+                                    timeout: false
+                                });
+
+                                $(this.form).submit();
+                            }
+                        });
+                    })(jQuery);
+
+                });
+            </script>
+        </div>
+    <?php endif; ?>
+</div>

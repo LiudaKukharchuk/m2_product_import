@@ -1,3 +1,4 @@
+code,label,type
 "sku","Маркировка","text"
 "norm","Стандарт","text"
 "inner_m","m","float"

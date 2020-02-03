@@ -2,7 +2,7 @@
 
 namespace Kukharchuk\ProductImport\Model\Import;
 
-class ProductCsvHandler
+class ProductCsvHandler extends BaseCsvHandler
 {
     /**
      * Collection of publicly available stores
@@ -10,24 +10,11 @@ class ProductCsvHandler
      * @var \Magento\Store\Model\ResourceModel\Store\Collection
      */
     protected $_publicStores;
-    /**
-     * CSV Processor
-     *
-     * @var \Magento\Framework\File\Csv
-     */
-    protected $csvProcessor;
-    /**
-     * @var array
-     */
-    protected $attributeMap;
+
     /**
      * @var \Magento\Catalog\Model\ProductFactory
      */
     protected $_productFactory;
-    /**
-     * @var \Magento\Eav\Api\AttributeRepositoryInterface
-     */
-    protected $attributeRepository;
     /**
      * @var string
      */
@@ -47,15 +34,12 @@ class ProductCsvHandler
         \Magento\Catalog\Model\ProductFactory $_productFactory,
         \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository
     ) {
+        parent::__construct($csvProcessor, $attributeRepository);
         $this->_publicStores = $storeCollection->setLoadDefault(false);
         $this->_productFactory = $_productFactory;
-        $this->csvProcessor = $csvProcessor;
-        $this->attributeRepository = $attributeRepository;
     }
 
     /**
-     * Import Tax Rates from CSV file
-     *
      * @param array $file file info retrieved from $_FILES array
      * @return void
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -69,6 +53,7 @@ class ProductCsvHandler
 
         // first row of file represents headers
         $this->setAttributeMap(array_shift($productsRawData));
+
         $this->setIdField();
         // check if all imported columns have a proper attribute
         $this->checkAttributes();
@@ -77,22 +62,15 @@ class ProductCsvHandler
         }
     }
 
-    /**
-     * @param array $fields
-     */
-    protected function setAttributeMap(array $fields)
-    {
-        $this->attributeMap = $fields;
-    }
 
     /**
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function setIdField()
     {
-        if (array_search('id', $this->attributeMap)) {
+        if (array_search('id', $this->attributeMap) !== false) {
             $this->idField = 'id';
-        } elseif (array_search('sku', $this->attributeMap)) {
+        } elseif (array_search('sku', $this->attributeMap) !== false) {
             $this->idField = 'sku';
         } else {
             throw new \Magento\Framework\Exception\LocalizedException(
@@ -106,14 +84,7 @@ class ProductCsvHandler
      */
     protected function checkAttributes()
     {
-        $notExistAttributes = [];
-        foreach ($this->attributeMap as $attribute) {
-            try {
-                $attribute = $this->attributeRepository->get(\Magento\Catalog\Model\Product::ENTITY, $attribute);
-            } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
-                $notExistAttributes[] = $attribute;
-            }
-        }
+        $notExistAttributes = $this->getNotExistsAttributes($this->attributeMap);
         if (count($notExistAttributes) >= 1) {
             throw new \Magento\Framework\Exception\LocalizedException(
                 __("There are no attributes with codes: " .
@@ -135,29 +106,5 @@ class ProductCsvHandler
         $product->addData($productData);
 
         $product->save();
-    }
-
-    /**
-     * @param $productData
-     * @return array
-     */
-    protected function applyAttributeMap($productData)
-    {
-        $mappedData = [];
-        foreach ($productData as $index => $data) {
-            $mappedData[$this->attributeMap[$index]] = $data;
-        }
-
-        return $mappedData;
-    }
-
-    // TODO: need to delete
-    protected function log($message)
-    {
-        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/templog.log');
-        $logger = new \Zend\Log\Logger();
-        $logger->addWriter($writer);
-
-        $logger->info($message);
     }
 }
