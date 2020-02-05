@@ -1,6 +1,6 @@
 attribute_code,frontend_label,backend_type,frontend_input
 "sku","Маркировка","text","text"
-"norm_1","Стандарт","text","text"
+"norm","Стандарт","text","text"
 "inner_m","m","float","text"
 "inner_d","d","float","text"
 "external_d","D","float","text"
