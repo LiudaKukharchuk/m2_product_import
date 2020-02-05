@@ -46,7 +46,6 @@ class ProductCsvHandler extends BaseCsvHandler
         }
     }
 
-
     /**
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -85,9 +84,26 @@ class ProductCsvHandler extends BaseCsvHandler
     protected function _importProduct(array $productData)
     {
         $productData = $this->applyAttributeMap($productData);
-
+        $name = 'Cur bromium unda.' . rand(1, 3000);
         $product = $this->productFactory->create()->load($productData[$this->idField], $this->idField);
         $product->addData($productData);
+        $product->setAttributeSetId(4);
+        $product->setName($name);
+        $product->setPrice(12.33);
+        $product->setTypeId('simple');
+        $product->setVisibility(4);
+        $product->setWebsiteIds([1]);
+        $product->setStockData(array(
+                'use_config_manage_stock' => 0, //'Use config settings' checkbox
+                'manage_stock'            => 1, //manage stock
+                'min_sale_qty'            => 1, //Minimum Qty Allowed in Shopping Cart
+                'is_in_stock'             => 1, //Stock Availability
+                'qty'                     => 100 //qty
+            )
+        );
+        $product->setTaxClassId(2);
+        $product->setStatus(\Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
+
 
         $product->save();
     }
