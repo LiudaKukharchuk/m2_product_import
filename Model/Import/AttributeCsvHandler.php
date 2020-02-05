@@ -12,21 +12,24 @@ class AttributeCsvHandler extends BaseCsvHandler
      * @var \Magento\Framework\ObjectManagerInterface
      */
     protected $objectManager;
+    protected $attributeFactory;
+    protected $groupFactory;
 
     /**
      * AttributeCsvHandler constructor.
      *
      * @param \Magento\Framework\File\Csv $csvProcessor
      * @param \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
      */
     public function __construct(
         \Magento\Framework\File\Csv $csvProcessor,
         \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository,
-        \Magento\Framework\ObjectManagerInterface $objectManager
+        \Magento\Catalog\Model\Entity\AttributeFactory $attributeFactory,
+        \Magento\Catalog\Model\Product\Attribute\GroupFactory $groupFactory
     ) {
         parent::__construct($csvProcessor, $attributeRepository);
-        $this->objectManager = $objectManager;
+        $this->attributeFactory = $attributeFactory;
+        $this->groupFactory = $groupFactory;
     }
 
     /**
@@ -73,7 +76,7 @@ class AttributeCsvHandler extends BaseCsvHandler
         $ignoredCount = 0;
         foreach ($attributesData as $attributeData) {
             $attributeData = $this->applyAttributeMap($attributeData);
-            if (array_search($attributeData['attribute_code'], $this->newAttributes) !== false) {
+            if (array_search($attributeData['attribute_code'], $this->newAttributes) !== false && $attributeData['attribute_code']) {
                 $this->createAttribute($attributeData);
                 $createdCount++;
             } else {
@@ -93,7 +96,7 @@ class AttributeCsvHandler extends BaseCsvHandler
      */
     protected function createAttribute(array $attributeData)
     {
-        $attribute = $this->objectManager->create('\Magento\Catalog\Model\Entity\Attribute');
+        $attribute = $this->attributeFactory->create();
         $attribute = $this->setDefaultParams($attribute);
 
         foreach ($attributeData as $param => $value) {
@@ -110,8 +113,10 @@ class AttributeCsvHandler extends BaseCsvHandler
     {
         return $attribute
             ->setBackendModel('')
+            ->setAttributeGroupId($this->getAttributeGroupId())
+            ->setAttributeSetId($this->getAttributeSetId())
             ->setFrontendClass('')
-            ->setEntityTypeId(4)
+            ->setEntityTypeId($this->getEntityTypeId())
             ->setIsRequired(false)
             ->setDefaultValue('')
             ->setIsUnique(false)
@@ -138,5 +143,39 @@ class AttributeCsvHandler extends BaseCsvHandler
             ->setPosition('')
             ->setIsWysiwygEnabled(0)
             ->setIsUsedForPromoRules(0);
+    }
+
+    protected function getAttributeGroupId()
+    {
+        $attributeGroup = $this->groupFactory->create()->load('custom_attributes', 'attribute_group_code');
+        if (!$attributeGroup->getAttributeGroupId()) {
+            $attributeGroup = $this->createAttributeGroup();
+        }
+
+        return $attributeGroup->getAttributeGroupId();
+    }
+
+    // TODO: Fix this hard code
+    protected function getAttributeSetId()
+    {
+        return 4; // Default product attribute set id
+    }
+
+    // TODO: Fix this hard code
+    protected function getEntityTypeId()
+    {
+        return 4; // catalog_product entity type id
+    }
+
+    protected function createAttributeGroup()
+    {
+        $attributeGroup = $this->groupFactory->create();
+        $attributeGroup->setEntityTypeId($this->getEntityTypeId())
+            ->setAttributeSetId($this->getAttributeSetId())
+            ->setAttributeGroupName('Custom Attributes')
+            ->setAttributeGroupCode('custom_attributes');
+        $attributeGroup->save();
+
+        return $attributeGroup;
     }
 }
