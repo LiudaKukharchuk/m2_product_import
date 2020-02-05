@@ -11,12 +11,16 @@
         <resources>
             <resource id="Magento_Backend::admin">
                 <resource id="Magento_Catalog::catalog">
-                    <resource id="Kukharchuk_ProductImport::product_import"
+                    <resource id="Kukharchuk_ProductImport::product_import_page"
                               title="Kukharchuk" translate="title"
                               sortOrder="30">
                         <resource
-                                id="Kukharchuk_ProductImport::product_import_import"
+                                id="Kukharchuk_ProductImport::product_import_action"
                                 title="Product Import" translate="title"
+                                sortOrder="30"/>
+                        <resource
+                                id="Kukharchuk_ProductImport::attribute_import"
+                                title="Attribute Import" translate="title"
                                 sortOrder="30"/>
                     </resource>
                 </resource>

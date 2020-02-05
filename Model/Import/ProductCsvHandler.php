@@ -5,16 +5,9 @@ namespace Kukharchuk\ProductImport\Model\Import;
 class ProductCsvHandler extends BaseCsvHandler
 {
     /**
-     * Collection of publicly available stores
-     *
-     * @var \Magento\Store\Model\ResourceModel\Store\Collection
-     */
-    protected $_publicStores;
-
-    /**
      * @var \Magento\Catalog\Model\ProductFactory
      */
-    protected $_productFactory;
+    protected $productFactory;
     /**
      * @var string
      */
@@ -23,20 +16,17 @@ class ProductCsvHandler extends BaseCsvHandler
     /**
      * ProductCsvHandler constructor.
      *
-     * @param \Magento\Store\Model\ResourceModel\Store\Collection $storeCollection
      * @param \Magento\Framework\File\Csv $csvProcessor
-     * @param \Magento\Catalog\Model\ProductFactory $_productFactory
+     * @param \Magento\Catalog\Model\ProductFactory $productFactory
      * @param \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository
      */
     public function __construct(
-        \Magento\Store\Model\ResourceModel\Store\Collection $storeCollection,
         \Magento\Framework\File\Csv $csvProcessor,
-        \Magento\Catalog\Model\ProductFactory $_productFactory,
+        \Magento\Catalog\Model\ProductFactory $productFactory,
         \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository
     ) {
         parent::__construct($csvProcessor, $attributeRepository);
-        $this->_publicStores = $storeCollection->setLoadDefault(false);
-        $this->_productFactory = $_productFactory;
+        $this->productFactory = $productFactory;
     }
 
     /**
@@ -46,13 +36,7 @@ class ProductCsvHandler extends BaseCsvHandler
      */
     public function importFromCsvFile($file)
     {
-        if (!isset($file['tmp_name'])) {
-            throw new \Magento\Framework\Exception\LocalizedException(__('Invalid file upload attempt.'));
-        }
-        $productsRawData = $this->csvProcessor->getData($file['tmp_name']);
-
-        // first row of file represents headers
-        $this->setAttributeMap(array_shift($productsRawData));
+        $productsRawData = parent::importFromCsvFile($file);
 
         $this->setIdField();
         // check if all imported columns have a proper attribute
@@ -102,7 +86,7 @@ class ProductCsvHandler extends BaseCsvHandler
     {
         $productData = $this->applyAttributeMap($productData);
 
-        $product = $this->_productFactory->create()->load($productData[$this->idField], $this->idField);
+        $product = $this->productFactory->create()->load($productData[$this->idField], $this->idField);
         $product->addData($productData);
 
         $product->save();

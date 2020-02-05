@@ -1,0 +1,3 @@
+attribute_code,frontend_label,backend,frontend_input
+"sku","Маркировка","text","text"
+"norm","Стандарт","text","text"

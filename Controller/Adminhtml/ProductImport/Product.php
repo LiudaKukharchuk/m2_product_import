@@ -52,8 +52,8 @@ class Product extends \Kukharchuk\ProductImport\Controller\Adminhtml\Base
     {
         return $this->_authorization->isAllowed(
                 'Magento_ImportExport::import'
-            ) || $this->_authorization->isAllowed(
-                'Kukharchuk_ProductImport::product_import_import'
+            ) && $this->_authorization->isAllowed(
+                'Kukharchuk_ProductImport::product_import_action'
             );
     }
 }

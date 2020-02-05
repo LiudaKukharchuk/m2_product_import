@@ -11,7 +11,7 @@ class Index extends \Magento\Backend\App\Action
      *
      * @see _isAllowed()
      */
-    const ADMIN_RESOURCE = 'Kukharchuk_ProductImport::product_import_import';
+    const ADMIN_RESOURCE = 'Kukharchuk_ProductImport::product_import_page';
     /**
      * @var \Magento\Framework\View\Result\PageFactory
      */
@@ -34,12 +34,13 @@ class Index extends \Magento\Backend\App\Action
     /**
      * Load the page defined in view/adminhtml/layout/kukharchuk_productimport_index.xml
      *
-     * @return \Magento\Framework\View\Result\Page
+     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface
      */
     public function execute()
     {
         $resultPage = $this->resultFactory->create(ResultFactory::TYPE_PAGE);
         $resultPage->setActiveMenu('Kukharchuk_ProductImport::product_import_import');
+
         return $resultPage;
     }
 }

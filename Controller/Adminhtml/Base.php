@@ -9,7 +9,7 @@ abstract class Base extends \Magento\Backend\App\Action
      *
      * @see _isAllowed()
      */
-    const ADMIN_RESOURCE = 'Kukharchuk_ProductImport::product_import_import';
+    const ADMIN_RESOURCE = 'Kukharchuk_ProductImport::product_import_page';
 
     /**
      * @var \Magento\Framework\App\Response\Http\FileFactory

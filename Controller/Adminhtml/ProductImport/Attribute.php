@@ -3,8 +3,9 @@
 namespace Kukharchuk\ProductImport\Controller\Adminhtml\ProductImport;
 
 use Magento\Framework\Controller\ResultFactory;
+use \Kukharchuk\ProductImport\Controller\Adminhtml\Base as BaseAction;
 
-class Attribute extends \Kukharchuk\ProductImport\Controller\Adminhtml\Base
+class Attribute extends BaseAction
 {
     /**
      * @var \Kukharchuk\ProductImport\Model\Import\AttributeCsvHandler
@@ -25,9 +26,9 @@ class Attribute extends \Kukharchuk\ProductImport\Controller\Adminhtml\Base
         $importAttributeFile = $this->getRequest()->getFiles('import_attribute_file');
         if ($this->getRequest()->isPost() && isset($importAttributeFile['tmp_name'])) {
             try {
-                $this->importHandler->importFromCsvFile($importAttributeFile);
+                $result = $this->importHandler->importFromCsvFile($importAttributeFile);
 
-                $this->messageManager->addSuccess(__('Attributes has been imported.'));
+                $this->messageManager->addSuccess(__('Attributes has been imported. Created: <b>%1</b> attributes, Ignored: <b>%2</b> already exists attributes', $result['created'], $result['ignored']));
             } catch (\Magento\Framework\Exception\LocalizedException $e) {
                 $this->messageManager->addError($e->getMessage());
             } catch (\Exception $e) {
@@ -51,8 +52,8 @@ class Attribute extends \Kukharchuk\ProductImport\Controller\Adminhtml\Base
     {
         return $this->_authorization->isAllowed(
                 'Magento_ImportExport::import'
-            ) || $this->_authorization->isAllowed(
-                'Kukharchuk_ProductImport::product_import_import'
+            ) && $this->_authorization->isAllowed(
+                'Kukharchuk_ProductImport::attribute_import'
             );
     }
 }

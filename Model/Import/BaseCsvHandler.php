@@ -36,6 +36,23 @@ class BaseCsvHandler
     }
 
     /**
+     * @param array $file file info retrieved from $_FILES array
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function importFromCsvFile($file)
+    {
+        if (!isset($file['tmp_name'])) {
+            throw new \Magento\Framework\Exception\LocalizedException(__('Invalid file upload attempt.'));
+        }
+        $rawData = $this->csvProcessor->getData($file['tmp_name']);
+
+        // first row of file represents headers
+        $this->setAttributeMap(array_shift($rawData));
+        return $rawData;
+    }
+
+    /**
      * @param array $fields
      */
     protected function setAttributeMap(array $fields)

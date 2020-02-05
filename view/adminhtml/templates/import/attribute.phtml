@@ -21,7 +21,34 @@
                 </div>
                 <?php if ($block->getUseContainer()) :?>
             </form>
-        <?php endif; ?>
+            <?php endif; ?>
+            <?php if ($block->getUseContainer()) :?>
+            <form id="attribute-download-form"
+                  class="admin__fieldset"
+                  action="<?= $block->escapeUrl($block->getUrl('kukharchuk/productimport/download')) ?>"
+                  method="post"
+                  enctype="multipart/form-data">
+                <?php endif; ?>
+                <?= $block->getBlockHtml('formkey') ?>
+                <div class="fieldset admin__field">
+                    <div style="width: 70%">
+                        <p class="a-center"><?= __('You can download sample file for import new attributes') ?></p>
+                    </div>
+                    <label for="download_attribute_type" class="admin__field-label"><span><?= $block->escapeHtml(__('Type of file for download')) ?></span></label>
+                    <div class="admin__field-control">
+                        <select id="download_attribute_type"
+                               name="download_attribute_type"
+                               class="required-entry select admin__control-select">
+                            <option selected="selected"><?= __('') ?></option>
+                            <option value="minimum"><?= __('With minimum required params') ?></option>
+                            <option value="all"><?= __('With all possible params') ?></option>
+                        </select>
+                        <?= $block->getButtonHtml(__('Download Test File'), '', 'download-attribute') ?>
+                    </div>
+                </div>
+                <?php if ($block->getUseContainer()) :?>
+            </form>
+            <?php endif; ?>
             <script>
                 require(['jquery', "mage/mage", "loadingPopup"], function(jQuery){
 
@@ -38,6 +65,12 @@
                         });
                     })(jQuery);
 
+                    jQuery('#attribute-download-form').mage('form').mage('validation');
+                    (function ($) {
+                        $('.download-attribute').click(function(){
+                            $(this.form).submit();
+                        });
+                    })(jQuery);
                 });
             </script>
         </div>
