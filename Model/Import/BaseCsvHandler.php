@@ -19,6 +19,10 @@ class BaseCsvHandler
      * @var \Magento\Eav\Api\AttributeRepositoryInterface
      */
     protected $attributeRepository;
+    /**
+     * @var array
+     */
+    protected $requiredParams;
 
 
     /**
@@ -89,6 +93,26 @@ class BaseCsvHandler
         }
 
         return $mappedData;
+    }
+
+    /**
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    protected function checkRequiredParam()
+    {
+        foreach ($this->requiredParams as $param) {
+            if (array_search($param, $this->attributeMap) === false) {
+                throw new \Magento\Framework\Exception\LocalizedException(
+                    __("There is no column with parameter: <b>%1</b>. Please fix imported file and try again.", $param)
+                );
+            }
+        }
+    }
+
+    // TODO: Fix this hard code
+    protected function getAttributeSetId()
+    {
+        return 4; // Default product attribute set id
     }
 
     // TODO: need to delete

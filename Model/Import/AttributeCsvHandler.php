@@ -14,6 +14,7 @@ class AttributeCsvHandler extends BaseCsvHandler
     protected $objectManager;
     protected $attributeFactory;
     protected $groupFactory;
+    protected $requiredParams = ['attribute_code', 'frontend_label', 'backend_type', 'frontend_input'];
 
     /**
      * AttributeCsvHandler constructor.
@@ -48,21 +49,6 @@ class AttributeCsvHandler extends BaseCsvHandler
         $this->newAttributes = $this->getNotExistsAttributes($attributeCodes);
 
         return $this->_importAttributes($attributeRawData);
-    }
-
-    /**
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    protected function checkRequiredParam()
-    {
-        $requiredParams = ['attribute_code', 'frontend_label', 'backend_type', 'frontend_input'];
-        foreach ($requiredParams as $param) {
-            if (array_search($param, $this->attributeMap) === false) {
-                throw new \Magento\Framework\Exception\LocalizedException(
-                    __("There is no column with parameter: <b>%1</b>. Please fix imported file and try again.", $param)
-                );
-            }
-        }
     }
 
     /**
@@ -155,11 +141,7 @@ class AttributeCsvHandler extends BaseCsvHandler
         return $attributeGroup->getAttributeGroupId();
     }
 
-    // TODO: Fix this hard code
-    protected function getAttributeSetId()
-    {
-        return 4; // Default product attribute set id
-    }
+
 
     // TODO: Fix this hard code
     protected function getEntityTypeId()

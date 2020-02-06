@@ -32,7 +32,7 @@ class Product extends \Kukharchuk\ProductImport\Controller\Adminhtml\Base
             } catch (\Magento\Framework\Exception\LocalizedException $e) {
                 $this->messageManager->addError($e->getMessage());
             } catch (\Exception $e) {
-                $this->messageManager->addError(__('Invalid file upload attempt'));
+                $this->messageManager->addError($e->getMessage());
             }
         } else {
             $this->messageManager->addError(__('Invalid file upload attempt'));

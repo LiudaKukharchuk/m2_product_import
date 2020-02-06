@@ -1,0 +1,2 @@
+attribute_code,frontend_label,backend_type,frontend_input,frontend_model
+"bearing_sketch","Эскиз подшипника","varchar","media_image",Kukharchuk\ProductImport\Model\Product\Attribute\Backend\BearingSketch
